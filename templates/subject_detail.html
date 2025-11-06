@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ subject.subject_name }} | StudyBuddy AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .container {
+      max-width: 800px;
+      margin-top: 60px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      padding: 40px;
+    }
+    .file-card {
+      background: #f1f3f5;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease-in-out;
+    }
+    .file-card:hover {
+      background: #e9ecef;
+      transform: scale(1.01);
+    }
+    .btn-custom {
+      border-radius: 8px;
+      margin-right: 10px;
+    }
+    .remove-btn {
+      font-size: 14px;
+      color: #dc3545;
+      border: 1px solid #dc3545;
+      background: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      transition: all 0.2s;
+    }
+    .remove-btn:hover {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2 class="text-center">📘 {{ subject.subject_name }}</h2>
+  <p class="text-muted text-center">{{ subject.description or "No description available" }}</p>
+  <hr>
+
+  <!-- Upload Section -->
+  <h5>📤 Upload Notes</h5>
+  <form method="POST" action="{{ url_for('subject_upload', subject_id=subject.subject_id) }}" enctype="multipart/form-data">
+    <div class="input-group mb-3">
+      <input type="file" name="file" class="form-control" accept=".pdf,.docx,.txt" required>
+      <button class="btn btn-primary" type="submit">Upload</button>
+    </div>
+  </form>
+
+  <!-- Chat Button -->
+  <div class="mb-3">
+<a href="{{ url_for('subject_chat', subject_id=subject.subject_id) }}" class="btn btn-success btn-custom">💬 Chat with AI</a>
+    <a href="{{ url_for('subjects') }}" class="btn btn-secondary btn-custom">← Back</a>
+  </div>
+
+  <hr>
+
+  <!-- Uploaded Files -->
+  <h5>🗂 Uploaded Files</h5>
+  {% if files %}
+    {% for f in files %}
+      <div class="file-card">
+        <div>
+          <strong>{{ f.filename }}</strong><br>
+          <small class="text-muted">Uploaded on {{ f.uploaded_at }}</small>
+        </div>
+        <form action="{{ url_for('delete_file', file_id=f.file_id or f.id) }}" method="POST" class="m-0">
+          <button type="submit" class="remove-btn">Remove</button>
+        </form>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">No files uploaded yet.</p>
+  {% endif %}
+</div>
+
+</body>
+</html>

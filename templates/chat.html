@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>StudyBuddy AI Chat</title>
+  <style>
+    body {font-family: Arial; background:#fafafa; margin:40px;}
+    .chatbox {max-width:600px; margin:auto; background:#fff; padding:20px;
+              border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
+    textarea {width:100%; height:100px; margin-top:10px;}
+    .ai, .user {margin:10px 0; padding:10px; border-radius:8px;}
+    .user {background:#e1f5fe;}
+    .ai {background:#ede7f6;}
+  </style>
+</head>
+<body>
+<div class="chatbox">
+  <h2>💬 Ask StudyBuddy AI</h2>
+  {% if user_msg %}
+    <div class="user"><b>You:</b> {{user_msg}}</div>
+  {% endif %}
+  {% if ai_reply %}
+    <div class="ai"><b>AI:</b> {{ai_reply}}</div>
+  {% endif %}
+
+  <form method="POST">
+    <textarea name="question" placeholder="Ask something about your uploaded notes..." required></textarea><br>
+    <button type="submit">Ask AI</button>
+  </form>
+  <p><a href="/dashboard">⬅ Back to Dashboard</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# --- Python & Flask ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+instance/
+.env
+
+# --- Virtual Environment ---
+venv/
+env/
+
+# --- System files ---
+.DS_Store
+Thumbs.db
+
+# --- IDE / Editor files ---
+.vscode/
+.idea/
+
+# --- Uploads & Local Data ---
+uploads/
+data/uploads/
+*.db
