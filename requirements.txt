@@ -1,19 +1,31 @@
+# --- Core framework ---
 flask
 gunicorn
-nltk
-spacy
+
+# --- NLP / AI ---
 transformers
 torch
-scikit-learn
+spacy
+nltk
+
+# --- Data & ML ---
 pandas
 numpy
+scikit-learn
+
+# --- Visualization ---
 matplotlib
 seaborn
 plotly
+
+# --- Utils ---
 requests
 pypdf
-ollama==0.1.6
+
+# --- LangChain stack (compatible) ---
 langchain==0.1.16
-langchain_community==0.0.10
+langchain-community==0.0.10
 chromadb==0.4.22
-unstructured==0.10.30
+
+# --- Optional helper libs ---
+tiktoken
