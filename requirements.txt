@@ -15,6 +15,7 @@ scikit-learn
 langchain==0.3.7
 langchain-community==0.3.7
 chromadb==0.5.5
+langchain-ollama
 
 # --- Utilities ---
 requests
