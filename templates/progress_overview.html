@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Progress Overview | StudyBuddy AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #4cc9f0;
+      --success-color: #4caf50;
+      --warning-color: #ff9800;
+      --danger-color: #e74c3c;
+      --gradient: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      --light-bg: #f8f9fa;
+      --card-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      --hover-shadow: 0 15px 30px rgba(0,0,0,0.12);
+    }
+
+    body {
+      background-color: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar with 3D effect */
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 5px 0 15px rgba(0,0,0,0.08);
+      height: 100vh;
+      position: fixed;
+      padding: 25px 0;
+      transition: all 0.3s ease;
+      z-index: 100;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    .sidebar.hidden {
+      margin-left: -260px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 25px 25px;
+      border-bottom: 1px solid #e9ecef;
+      margin-bottom: 20px;
+      transform: translateZ(20px);
+    }
+
+    .logo i {
+      color: var(--primary-color);
+      font-size: 28px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .logo-text {
+      font-weight: 700;
+      color: #212529;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 25px;
+      color: #495057;
+      text-decoration: none;
+      transition: all 0.3s;
+      border-left: 3px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient);
+      opacity: 0.1;
+      transition: left 0.3s;
+    }
+
+    .nav-link:hover::before, .nav-link.active::before {
+      left: 0;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: rgba(67, 97, 238, 0.08);
+      color: var(--primary-color);
+      border-left: 3px solid var(--primary-color);
+      transform: translateX(5px);
+    }
+
+    /* Toggle Button */
+    .toggle-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 110;
+      background: var(--gradient);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+
+    .toggle-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(67, 97, 238, 0.4);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar.hidden + .main-content {
+      margin-left: 0;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h2 {
+      font-weight: 700;
+      color: #212529;
+      position: relative;
+      display: inline-block;
+    }
+
+    .header h2::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: var(--gradient);
+      border-radius: 3px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: var(--gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    /* Enhanced Subject Cards */
+    .subject-card {
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+      padding: 20px;
+      background: white;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      perspective: 500px;
+    }
+
+    .subject-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--gradient);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+
+    .subject-card:hover {
+      transform: translateY(-8px) rotateX(5deg);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .subject-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .btn-back {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      transition: 0.3s;
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-back:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(67, 97, 238, 0.4);
+    }
+
+    /* Progress Rings */
+    .progress-ring-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+    }
+
+    .progress-ring-bg {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #f0f0f0;
+      position: absolute;
+    }
+
+    .progress-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: absolute;
+      clip: rect(0, 90px, 180px, 0);
+    }
+
+    .progress-ring-fill {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 12px solid transparent;
+      position: absolute;
+      clip: rect(0, 90px, 180px, 0);
+    }
+
+    .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .progress-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+
+    /* Performance Indicators */
+    .performance-indicators {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    .indicator {
+      text-align: center;
+      flex: 1;
+    }
+
+    .indicator-value {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .indicator-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+
+    /* Subject Performance Bar */
+    .performance-bar {
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+
+    .performance-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--gradient);
+      transition: width 1s ease;
+    }
+
+    /* View Learning Path Button */
+    .btn-learning-path {
+      background: transparent;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-learning-path::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient);
+      transition: left 0.3s;
+      z-index: -1;
+    }
+
+    .btn-learning-path:hover {
+      color: white;
+    }
+
+    .btn-learning-path:hover::before {
+      left: 0;
+    }
+
+    /* Performance Badges */
+    .performance-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    .badge-excellent {
+      background: linear-gradient(45deg, #4caf50, #8bc34a);
+      color: white;
+    }
+
+    .badge-good {
+      background: linear-gradient(45deg, #2196f3, #03a9f4);
+      color: white;
+    }
+
+    .badge-average {
+      background: linear-gradient(45deg, #ff9800, #ffc107);
+      color: white;
+    }
+
+    .badge-poor {
+      background: linear-gradient(45deg, #f44336, #e91e63);
+      color: white;
+    }
+
+    /* AI Performance Insights */
+    .ai-insight {
+      background: var(--gradient);
+      color: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ai-insight::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255,255,255,0.1);
+      transform: rotate(45deg);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        margin-left: -260px;
+      }
+      
+      .sidebar.active {
+        margin-left: 0;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="logo">
+      <i class="fas fa-brain"></i>
+      <span class="logo-text">StudyBuddy AI</span>
+    </div>
+    <div class="nav flex-column">
+      <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="{{ url_for('subjects') }}" class="nav-link"><i class="fas fa-book"></i> My Subjects</a>
+      <a href="{{ url_for('progress_overview') }}" class="nav-link active"><i class="fas fa-chart-line"></i> Progress</a>
+      <a href="#" class="nav-link"><i class="fas fa-user-friends"></i> Friends <i class="fas fa-crown text-warning ms-1"></i></a>
+      <a href="#" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
+    </div>
+  </div>
+
+  <!-- Toggle Sidebar Button -->
+  <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <div class="header">
+      <h2>📊 Subject Performance Overview</h2>
+      <div class="user-info">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-back ms-3"><i class="fas fa-arrow-left me-1"></i> Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      {% for s in subjects %}
+      <div class="col-md-4">
+        <div class="subject-card text-center">
+          <!-- Performance Badge -->
+          <div class="performance-badge {% if s.success_rate >= 80 %}badge-excellent{% elif s.success_rate >= 60 %}badge-good{% elif s.success_rate >= 40 %}badge-average{% else %}badge-poor{% endif %}">
+            {% if s.success_rate >= 80 %}Excellent{% elif s.success_rate >= 60 %}Good{% elif s.success_rate >= 40 %}Average{% else %}Needs Work{% endif %}
+          </div>
+          
+          <h4>{{ s.name }}</h4>
+          
+          <!-- Progress Ring -->
+          <div class="progress-ring-container">
+            <div class="progress-ring-bg"></div>
+            <div class="progress-ring">
+              <div class="progress-ring-fill" id="ring{{ s.id }}" style="border-color: {% if s.success_rate >= 80 %}#4caf50{% elif s.success_rate >= 60 %}#2196f3{% elif s.success_rate >= 40 %}#ff9800{% else %}#f44336{% endif %};"></div>
+            </div>
+            <div class="progress-text">
+              {{ s.success_rate }}%<br>
+              <span class="progress-label">Success</span>
+            </div>
+          </div>
+          
+          <!-- Performance Indicators -->
+          <div class="performance-indicators">
+            <div class="indicator">
+              <div class="indicator-value">{{ s.correct }}</div>
+              <div class="indicator-label">Correct</div>
+            </div>
+            <div class="indicator">
+              <div class="indicator-value">{{ s.wrong }}</div>
+              <div class="indicator-label">Wrong</div>
+            </div>
+            <div class="indicator">
+              <div class="indicator-value">{{ s.correct + s.wrong }}</div>
+              <div class="indicator-label">Total</div>
+            </div>
+          </div>
+          
+          <!-- Performance Bar -->
+          <div class="performance-bar">
+            <div class="performance-fill" id="bar{{ s.id }}" style="width: {{ s.success_rate }}%"></div>
+          </div>
+          
+          <a href="{{ url_for('subject_progress', subject_id=s.id) }}" class="btn btn-learning-path mt-2">
+            View Learning Path <i class="fas fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- AI Performance Insight -->
+    <div class="ai-insight">
+      <h5><i class="fas fa-robot me-2"></i> AI Performance Insight</h5>
+      <p class="mb-0">Based on your performance data, I recommend focusing on subjects with success rates below 70%. Try using spaced repetition for better retention!</p>
+    </div>
+  </div>
+
+  <script>
+    // Sidebar toggle
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+      mainContent.classList.toggle('expanded');
+    });
+
+    // Initialize progress rings
+    document.addEventListener('DOMContentLoaded', function() {
+      // Sample data for demonstration
+      const subjects = [
+        { id: 1, success_rate: 85 },
+        { id: 2, success_rate: 65 },
+        { id: 3, success_rate: 45 },
+        { id: 4, success_rate: 75 },
+        { id: 5, success_rate: 90 },
+        { id: 6, success_rate: 55 }
+      ];
+      
+      subjects.forEach(s => {
+        const ring = document.getElementById(`ring${s.id}`);
+        if (ring) {
+          ring.style.transform = `rotate(${(s.success_rate/100)*180}deg)`;
+        }
+        
+        const bar = document.getElementById(`bar${s.id}`);
+        if (bar) {
+          // Animate the bar on page load
+          setTimeout(() => {
+            bar.style.width = `${s.success_rate}%`;
+          }, 300);
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

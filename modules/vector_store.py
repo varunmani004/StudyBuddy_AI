@@ -1,13 +1,18 @@
+# ==============================================================
+# 🧠 VECTOR STORE MODULE — StudyBuddy AI (LangChain v1.0+ & Ollama)
+# ==============================================================
+
 import os
 from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings  # ✅ Updated import — new official embedding class
 
-# Set your embedding model name
+# ✅ Use a supported embedding model (works locally with Ollama)
 EMBED_MODEL = "nomic-embed-text"
 
-# Base directory to store vector databases
+# Base directory for all vector databases
 VECTOR_DB_DIR = os.path.join("vector_dbs")
 os.makedirs(VECTOR_DB_DIR, exist_ok=True)
+
 
 # -------------------------------------------------------------
 # 🧠 Add a text file into the vector database for a specific subject
@@ -22,15 +27,19 @@ def add_text_file_to_vector_db(text_file_path, subject_id):
             print(f"⚠️ Empty text file: {text_file_path}")
             return 0
 
-        # Initialize embeddings
+        # ✅ Initialize embeddings with the new class
         embeddings = OllamaEmbeddings(model=EMBED_MODEL)
 
         # Folder for this subject’s vector store
         subject_db_dir = os.path.join(VECTOR_DB_DIR, f"subject_{subject_id}")
         os.makedirs(subject_db_dir, exist_ok=True)
 
-        # Create Chroma vector store
-        db = Chroma.from_texts([text_data], embedding=embeddings, persist_directory=subject_db_dir)
+        # Create Chroma vector store and persist
+        db = Chroma.from_texts(
+            [text_data],
+            embedding=embeddings,
+            persist_directory=subject_db_dir
+        )
         db.persist()
 
         print(f"✅ Added text to vector DB for subject {subject_id}")
@@ -50,10 +59,18 @@ def get_vector_store(subject_id):
         subject_db_dir = os.path.join(VECTOR_DB_DIR, f"subject_{subject_id}")
 
         if not os.path.exists(subject_db_dir):
-            raise FileNotFoundError(f"Vector DB for subject {subject_id} not found at {subject_db_dir}")
+            raise FileNotFoundError(
+                f"Vector DB for subject {subject_id} not found at {subject_db_dir}"
+            )
 
+        # ✅ Use the updated embedding function
         embeddings = OllamaEmbeddings(model=EMBED_MODEL)
-        db = Chroma(persist_directory=subject_db_dir, embedding_function=embeddings)
+
+        # Load the stored Chroma DB
+        db = Chroma(
+            persist_directory=subject_db_dir,
+            embedding_function=embeddings
+        )
         print(f"✅ Loaded vector store for subject {subject_id}")
         return db
 

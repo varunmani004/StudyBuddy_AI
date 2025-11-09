@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ subject.subject_name }} Learning Path | StudyBuddy AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #4cc9f0;
+      --success-color: #4bb543;
+      --warning-color: #ff9e00;
+      --danger-color: #dc3545;
+      --gradient: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      --ai-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      --hover-shadow: 0 15px 30px rgba(0,0,0,0.12);
+    }
+
+    body {
+      background: linear-gradient(135deg, #f0f2f5 0%, #e6e9f0 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .learning-path-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Enhanced Header */
+    .path-header {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .path-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--gradient);
+    }
+
+    .subject-title {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .subject-title h1 {
+      font-weight: 700;
+      color: var(--secondary-color);
+      margin-bottom: 5px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .subject-title h1::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--gradient);
+      border-radius: 3px;
+    }
+
+    .subject-title p {
+      color: #6c757d;
+      font-size: 18px;
+    }
+
+    /* Enhanced Main Content */
+    .path-content {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 992px) {
+      .path-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Enhanced Chart Section */
+    .chart-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--gradient);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .chart-title {
+      font-weight: 600;
+      color: var(--dark-color);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chart-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chart-btn {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chart-btn:hover {
+      background: #e9ecef;
+    }
+
+    .chart-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin: 20px 0;
+    }
+
+    /* Enhanced Stats Section */
+    .stats-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stats-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--ai-gradient);
+    }
+
+    .stats-title {
+      font-weight: 600;
+      color: var(--dark-color);
+      font-size: 20px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stats-grid {
+      display: grid;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      color: #6c757d;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Enhanced AI Tip */
+    .ai-tip {
+      background: linear-gradient(135deg, #eef1ff 0%, #e6e9ff 100%);
+      border-radius: 15px;
+      padding: 25px;
+      position: relative;
+      overflow: hidden;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .ai-tip::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255,255,255,0.1);
+      transform: rotate(45deg);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .ai-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .ai-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--ai-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .ai-title {
+      font-weight: 600;
+      color: var(--secondary-color);
+      margin: 0;
+    }
+
+    .ai-content {
+      color: #333;
+      line-height: 1.6;
+      font-size: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Progress Indicators */
+    .progress-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--success-color);
+    }
+
+    .progress-title {
+      font-weight: 600;
+      color: var(--dark-color);
+      font-size: 20px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-item {
+      margin-bottom: 25px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .progress-label {
+      font-weight: 500;
+      color: var(--dark-color);
+    }
+
+    .progress-value {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: #e9ecef;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 5px;
+      background: var(--gradient);
+      transition: width 1s ease;
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Enhanced Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: white;
+      border: 2px solid var(--primary-color);
+      border-radius: 12px;
+      padding: 15px 25px;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--primary-color);
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient);
+      transition: left 0.3s;
+      z-index: -1;
+    }
+
+    .action-btn:hover {
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .action-btn:hover::before {
+      left: 0;
+    }
+
+    .btn-primary {
+      background: var(--gradient);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .btn-primary::before {
+      background: var(--secondary-color);
+    }
+
+    /* Learning Milestones */
+    .milestones-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .milestones-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--warning-color);
+    }
+
+    .milestones-title {
+      font-weight: 600;
+      color: var(--dark-color);
+      font-size: 20px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .milestone-track {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .milestone-track::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 30px;
+      width: 2px;
+      height: 100%;
+      background: #e9ecef;
+    }
+
+    .milestone {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .milestone:last-child {
+      margin-bottom: 0;
+    }
+
+    .milestone-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #f8f9fa;
+      border: 3px solid #e9ecef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #6c757d;
+      margin-right: 20px;
+      position: relative;
+      z-index: 2;
+      transition: all 0.3s;
+    }
+
+    .milestone.completed .milestone-icon {
+      background: var(--success-color);
+      border-color: var(--success-color);
+      color: white;
+    }
+
+    .milestone.current .milestone-icon {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
+    .milestone-content {
+      flex: 1;
+    }
+
+    .milestone-title {
+      font-weight: 600;
+      color: var(--dark-color);
+      margin-bottom: 5px;
+    }
+
+    .milestone-description {
+      color: #6c757d;
+      font-size: 14px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .path-header,
+      .chart-section,
+      .stats-section,
+      .progress-section,
+      .milestones-section {
+        padding: 20px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .action-btn {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="learning-path-container">
+    <!-- Enhanced Header -->
+    <div class="path-header">
+      <div class="subject-title">
+        <h1>
+          <i class="fas fa-map-signs text-primary me-3"></i>
+          {{ subject.subject_name }} Learning Path
+        </h1>
+        <p>Track your progress and master {{ subject.subject_name }} with AI-powered insights</p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="path-content">
+      <!-- Left Column: Chart and Progress -->
+      <div>
+        <!-- Enhanced Chart Section -->
+        <div class="chart-section">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-chart-line text-primary"></i>
+              Learning Progress Over Time
+            </h3>
+            <div class="chart-actions">
+              <button class="chart-btn active" data-period="week">
+                <i class="fas fa-calendar-week"></i> Week
+              </button>
+              <button class="chart-btn" data-period="month">
+                <i class="fas fa-calendar-alt"></i> Month
+              </button>
+              <button class="chart-btn" data-period="all">
+                <i class="fas fa-calendar"></i> All Time
+              </button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="curveChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Progress Indicators -->
+        <div class="progress-section">
+          <h3 class="progress-title">
+            <i class="fas fa-tasks text-success"></i>
+            Performance Metrics
+          </h3>
+          
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Concept Mastery</span>
+              <span class="progress-value">{{ avg_acc }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {{ avg_acc }}%"></div>
+            </div>
+          </div>
+
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Consistency Score</span>
+              <span class="progress-value">{% if avg_acc > 80 %}85%{% elif avg_acc > 60 %}72%{% else %}65%{% endif %}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {% if avg_acc > 80 %}85%{% elif avg_acc > 60 %}72%{% else %}65%{% endif %}"></div>
+            </div>
+          </div>
+
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Learning Speed</span>
+              <span class="progress-value">{% if avg_acc > 80 %}Fast{% elif avg_acc > 60 %}Moderate{% else %}Steady{% endif %}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {% if avg_acc > 80 %}90%{% elif avg_acc > 60 %}75%{% else %}60%{% endif %}"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Learning Milestones -->
+        <div class="milestones-section">
+          <h3 class="milestones-title">
+            <i class="fas fa-flag-checkered text-warning"></i>
+            Learning Milestones
+          </h3>
+          
+          <div class="milestone-track">
+            <div class="milestone {% if avg_acc >= 25 %}completed{% elif avg_acc >= 15 %}current{% endif %}">
+              <div class="milestone-icon">
+                <i class="fas fa-play-circle"></i>
+              </div>
+              <div class="milestone-content">
+                <div class="milestone-title">Beginner Level</div>
+                <div class="milestone-description">Master basic concepts and fundamentals</div>
+              </div>
+            </div>
+
+            <div class="milestone {% if avg_acc >= 50 %}completed{% elif avg_acc >= 25 %}current{% endif %}">
+              <div class="milestone-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="milestone-content">
+                <div class="milestone-title">Intermediate Level</div>
+                <div class="milestone-description">Apply concepts to solve problems</div>
+              </div>
+            </div>
+
+            <div class="milestone {% if avg_acc >= 75 %}completed{% elif avg_acc >= 50 %}current{% endif %}">
+              <div class="milestone-icon">
+                <i class="fas fa-rocket"></i>
+              </div>
+              <div class="milestone-content">
+                <div class="milestone-title">Advanced Level</div>
+                <div class="milestone-description">Tackle complex scenarios and applications</div>
+              </div>
+            </div>
+
+            <div class="milestone {% if avg_acc >= 90 %}completed{% elif avg_acc >= 75 %}current{% endif %}">
+              <div class="milestone-icon">
+                <i class="fas fa-trophy"></i>
+              </div>
+              <div class="milestone-content">
+                <div class="milestone-title">Master Level</div>
+                <div class="milestone-description">Achieve subject mastery and expertise</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Stats and AI Tip -->
+      <div>
+        <!-- Enhanced Stats Section -->
+        <div class="stats-section">
+          <h3 class="stats-title">
+            <i class="fas fa-chart-bar text-primary"></i>
+            Quick Stats
+          </h3>
+          
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value">{{ avg_acc }}%</div>
+              <div class="stat-label">Average Accuracy</div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-value">{{ attempts }}</div>
+              <div class="stat-label">Quizzes Attempted</div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-value">
+                {% if curve_data|length > 0 %}
+                  {{ curve_data[-1].avg_accuracy|round|int }}%
+                {% else %}
+                  0%
+                {% endif %}
+              </div>
+              <div class="stat-label">Current Accuracy</div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-value">
+                {% if curve_data|length > 1 %}
+                  {{ (curve_data[-1].avg_accuracy - curve_data[0].avg_accuracy)|round|int }}%
+                {% else %}
+                  0%
+                {% endif %}
+              </div>
+              <div class="stat-label">Progress Gain</div>
+            </div>
+          </div>
+
+          <!-- Enhanced AI Tip -->
+          <div class="ai-tip">
+            <div class="ai-header">
+              <div class="ai-avatar">
+                <i class="fas fa-robot"></i>
+              </div>
+              <h4 class="ai-title">AI Study Tip</h4>
+            </div>
+            <div class="ai-content">
+              {{ advice }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a href="{{ url_for('progress_overview') }}" class="action-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Overview
+      </a>
+      <a href="{{ url_for('subject_chat', subject_id=subject.subject_id) }}" class="action-btn btn-primary">
+        <i class="fas fa-robot"></i>
+        Chat with AI Tutor
+      </a>
+      <a href="{{ url_for('generate_quiz_ai', subject_id=subject.subject_id) }}" class="action-btn">
+        <i class="fas fa-question-circle"></i>
+        Take Practice Quiz
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Chart
+    const ctx = document.getElementById('curveChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [{% for row in curve_data %}'{{ row.date.strftime("%b %d") }}',{% endfor %}],
+        datasets: [{
+          label: 'Accuracy (%)',
+          data: [{% for row in curve_data %}{{ row.avg_accuracy * 100 }},{% endfor %}],
+          borderColor: '#4361ee',
+          backgroundColor: 'rgba(67, 97, 238, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#4361ee',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            titleColor: '#333',
+            bodyColor: '#666',
+            borderColor: '#e9ecef',
+            borderWidth: 1,
+            callbacks: {
+              label: function(context) {
+                return `Accuracy: ${context.parsed.y.toFixed(1)}%`;
+              }
+            }
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeOutQuart'
+        }
+      }
+    });
+
+    // Chart period switching
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // In a real app, this would fetch new data based on the period
+        // For now, we'll just update the chart with a subtle animation
+        chart.update('active');
+      });
+    });
+
+    // Animate progress bars on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const progressBars = document.querySelectorAll('.progress-fill');
+      progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => {
+          bar.style.width = width;
+        }, 500);
+      });
+
+      // Add animation to milestone icons
+      const milestoneIcons = document.querySelectorAll('.milestone-icon');
+      milestoneIcons.forEach((icon, index) => {
+        icon.style.animationDelay = `${index * 0.2}s`;
+      });
+    });
+
+    // Add hover effects to stat cards
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+  </script>
+</body>
+</html>
