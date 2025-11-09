@@ -1,22 +1,31 @@
-# --- Core Web Framework ---
+# --- Core framework ---
 flask
 gunicorn
 
-# --- Database & Data Handling ---
-pymysql
-mysql-connector-python
+# --- NLP / AI ---
+transformers
+torch
+spacy
+nltk
+
+# --- Data & ML ---
 pandas
 numpy
-
-# --- NLP / Text Processing ---
-nltk
-spacy
 scikit-learn
 
-# --- Utilities ---
+# --- Visualization ---
+matplotlib
+seaborn
+plotly
+
+# --- Utils ---
 requests
 pypdf
 
-# --- Optional small visualization (if needed) ---
-matplotlib
-seaborn
+# --- LangChain stack (compatible) ---
+langchain==0.1.16
+langchain-community==0.0.10
+chromadb==0.4.22
+
+# --- Optional helper libs ---
+tiktoken
