@@ -19,6 +19,7 @@ chromadb==0.5.5
 # --- Utilities ---
 requests
 pypdf
+python-docx
 
 # --- Visualization ---
 matplotlib
