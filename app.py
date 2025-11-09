@@ -36,11 +36,11 @@ for folder in [
 # ==============================================================
 def get_db_connection():
     return pymysql.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="studybuddy_db",
-        cursorclass=pymysql.cursors.DictCursor,
+        host=os.getenv("MYSQLHOST", "mysql.railway.internal"),
+        user=os.getenv("MYSQLUSER", "root"),
+        password=os.getenv("MYSQLPASSWORD", ""),
+        database=os.getenv("MYSQLDATABASE", "railway"),
+        port=int(os.getenv("MYSQLPORT", 3306))
     )
 
 
