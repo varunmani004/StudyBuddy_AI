@@ -1,8 +1,8 @@
-# --- Core framework ---
+# --- Core Web Framework ---
 flask
 gunicorn
 
-# --- NLP / AI ---
+# --- AI / NLP ---
 transformers
 torch
 spacy
@@ -22,10 +22,10 @@ plotly
 requests
 pypdf
 
-# --- LangChain stack (compatible) ---
-langchain==0.1.16
-langchain-community==0.0.10
-chromadb==0.4.22
+# --- LangChain Stack (Compatible Pair) ---
+langchain==0.3.7
+langchain-community==0.3.7
+chromadb==0.5.5
 
-# --- Optional helper libs ---
+# --- Optional ---
 tiktoken
