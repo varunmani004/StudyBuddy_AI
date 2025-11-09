@@ -2,30 +2,11 @@
 flask
 gunicorn
 
-# --- AI / NLP ---
-transformers
-torch
-spacy
-nltk
-
-# --- Data & ML ---
+# --- Database & Data Handling ---
+mysql-connector-python
 pandas
 numpy
-scikit-learn
 
-# --- Visualization ---
-matplotlib
-seaborn
-plotly
-
-# --- Utils ---
+# --- Utilities ---
 requests
 pypdf
-
-# --- LangChain Stack (Compatible Pair) ---
-langchain==0.3.7
-langchain-community==0.3.7
-chromadb==0.5.5
-
-# --- Optional ---
-tiktoken
