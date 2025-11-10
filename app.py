@@ -36,24 +36,12 @@ for folder in [
 # ==============================================================
 def get_db_connection():
     return pymysql.connect(
-        host=os.getenv("MYSQLHOST", "mysql.railway.internal"),
-        user=os.getenv("MYSQLUSER", "root"),
-        password=os.getenv("MYSQLPASSWORD", ""),
-        database=os.getenv("MYSQLDATABASE", "railway"),
-        port=int(os.getenv("MYSQLPORT", 3306))
+        host="localhost",
+        user="root",
+        password="",
+        database="studybuddy_db",
+        cursorclass=pymysql.cursors.DictCursor,
     )
-
-@app.route("/testdb")
-def test_db():
-    try:
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute("SELECT NOW();")
-            result = cur.fetchone()
-        return f"✅ Connected to MySQL! Time: {result}"
-    except Exception as e:
-        return f"❌ Error: {e}"
-
 
 
 # ==============================================================
