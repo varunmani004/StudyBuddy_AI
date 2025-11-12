@@ -43,6 +43,19 @@ def get_db_connection():
         port=int(os.getenv("MYSQLPORT", 3306))
     )
 
+@app.route("/testdb")
+def testdb():
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT NOW()")
+            result = cursor.fetchone()
+        conn.close()
+        return f"✅ Connected to MySQL! Server time: {result[0]}"
+    except Exception as e:
+        return f"❌ Database connection error: {e}"
+
+
 
 # ==============================================================
 # 🏠 HOME + AUTH SYSTEM
