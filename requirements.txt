@@ -1,3 +1,4 @@
+# --- Core Web Framework ---
 flask
 gunicorn
 
@@ -12,8 +13,8 @@ nltk
 spacy
 scikit-learn
 langchain==0.2.14
-langchain-community==0.2.11
 langchain-core==0.2.37
+langchain-community==0.2.11
 langchain-ollama==0.1.0
 chromadb==0.5.3
 
