@@ -104,13 +104,13 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
+        username = request.form['username']
         password = request.form['password']
 
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
+        cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (username, password))
         user = cursor.fetchone()
 
         if user:
@@ -118,7 +118,7 @@ def login():
             flash("Login successful!", "success")
             return redirect(url_for('dashboard'))  # or dashboard route
         else:
-            flash("Invalid email or password.", "danger")
+            flash("Invalid username or password.", "danger")
             return redirect(url_for('login'))
 
         cursor.close()
