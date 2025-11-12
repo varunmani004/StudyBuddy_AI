@@ -36,11 +36,11 @@ for folder in [
 # ==============================================================
 def get_db_connection():
     return pymysql.connect(
-        host=os.getenv("MYSQLHOST"),
-        user=os.getenv("MYSQLUSER"),
-        password=os.getenv("MYSQLPASSWORD"),
-        database=os.getenv("MYSQLDATABASE"),
-        port=int(os.getenv("MYSQLPORT", 3306))
+        host=os.getenv("MYSQLHOST", "trolley.proxy.rlwy.net"),
+        user=os.getenv("MYSQLUSER", "root"),
+        password=os.getenv("MYSQLPASSWORD", "nsgEhetPqonqMUKkXuPSJfBOHoNweWoB"),
+        database=os.getenv("MYSQLDATABASE", "railway"),
+        port=int(os.getenv("MYSQLPORT", 10530))
     )
 
 @app.route("/testdb")
