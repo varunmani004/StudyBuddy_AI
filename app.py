@@ -101,30 +101,30 @@ def register():
     return render_template("register.html", msg=msg)
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    msg = ""
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, password))
-        account = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
+        user = cursor.fetchone()
+
+        if user:
+            session['user_id'] = user[0]
+            flash("Login successful!", "success")
+            return redirect(url_for('dashboard'))  # or dashboard route
+        else:
+            flash("Invalid email or password.", "danger")
+            return redirect(url_for('login'))
+
         cursor.close()
         conn.close()
 
-        if account:
-            session["loggedin"] = True
-            session["user_id"] = account["id"]
-            session["username"] = account["username"]
-            flash("Login successful!", "success")
-            return redirect(url_for("dashboard"))
-        else:
-            msg = "Incorrect username or password!"
-
-    return render_template("login.html", msg=msg)
+    return render_template('login.html')
 
 
 @app.route("/dashboard")
