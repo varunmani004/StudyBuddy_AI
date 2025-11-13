@@ -600,9 +600,14 @@
         <h2>StudyBuddy AI</h2>
       </div>
 
-      {% if msg %}
-        <div class="alert alert-danger">{{ msg }}</div>
-      {% endif %}
+     {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
 
       <form method="POST">
         <div class="mb-4">
@@ -713,12 +718,7 @@
     });
     
     // Auto-fill animation for demo purposes
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() {
-        document.getElementById('username').value = 'demo_user';
-        document.getElementById('password').value = 'password123';
-      }, 1000);
-    });
+    
   </script>
 </body>
 </html>

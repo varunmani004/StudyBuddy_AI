@@ -28,34 +28,33 @@
       background: linear-gradient(135deg, #f0f2f5 0%, #e6e9f0 100%);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
-      display: flex;
+      padding: 20px;
     }
 
-    /* Enhanced Sidebar */
-    .sidebar {
-      width: 280px;
+    /* Header */
+    .header-container {
       background: white;
-      box-shadow: 5px 0 15px rgba(0, 0, 0, 0.08);
-      height: 100vh;
-      position: fixed;
-      padding: 25px 0;
-      z-index: 100;
-      overflow-y: auto;
-      transform-style: preserve-3d;
-      perspective: 1000px;
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+      padding: 20px 30px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
     }
 
-    .sidebar-header {
-      padding: 0 25px 25px;
-      border-bottom: 1px solid #e9ecef;
-      margin-bottom: 20px;
-      transform: translateZ(20px);
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .logo-icon {
@@ -79,57 +78,53 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .nav-item {
-      margin-bottom: 5px;
+    .subject-info {
+      padding-left: 15px;
+      border-left: 2px solid #e9ecef;
     }
 
-    .nav-link {
+    .subject-name {
+      font-weight: 600;
+      color: var(--secondary-color);
+      margin: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-btn {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-size: 14px;
+      text-decoration: none;
+      color: #495057;
+      transition: all 0.3s;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 25px;
+      gap: 5px;
+    }
+
+    .header-btn:hover {
+      background: #e9ecef;
       color: #495057;
       text-decoration: none;
-      transition: all 0.3s;
-      border-left: 3px solid transparent;
-      position: relative;
-      overflow: hidden;
+      transform: translateY(-1px);
     }
 
-    .nav-link::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
+    .btn-primary {
       background: var(--gradient);
-      opacity: 0.1;
-      transition: left 0.3s;
+      color: white;
+      border-color: var(--primary-color);
     }
 
-    .nav-link:hover::before, .nav-link.active::before {
-      left: 0;
-    }
-
-    .nav-link:hover, .nav-link.active {
-      background: rgba(67, 97, 238, 0.05);
-      color: var(--primary-color);
-      border-left: 3px solid var(--primary-color);
-      transform: translateX(5px);
-    }
-
-    .nav-link i {
-      width: 20px;
-      text-align: center;
-    }
-
-    .main-content {
-      flex: 1;
-      margin-left: 280px;
-      padding: 30px;
-      max-height: 100vh;
-      overflow-y: auto;
+    .btn-primary:hover {
+      background: var(--secondary-color);
+      color: white;
     }
 
     /* Results Container */
@@ -491,89 +486,51 @@
       background: var(--secondary-color);
     }
 
-    /* Logout Section */
-    .logout-section {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #e9ecef;
-      text-align: center;
-    }
-
-    .logout-link {
-      color: #dc3545;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .logout-link::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: rgba(220, 53, 69, 0.1);
-      transition: left 0.3s;
-    }
-
-    .logout-link:hover::before {
-      left: 0;
-    }
-
-    .logout-link:hover {
-      color: #c82333;
-      transform: translateX(3px);
-    }
-
     /* Custom scrollbar */
-    .sidebar::-webkit-scrollbar,
-    .main-content::-webkit-scrollbar {
-      width: 6px;
+    body::-webkit-scrollbar {
+      width: 8px;
     }
     
-    .sidebar::-webkit-scrollbar-track,
-    .main-content::-webkit-scrollbar-track {
+    body::-webkit-scrollbar-track {
       background: #f1f1f1;
       border-radius: 10px;
     }
     
-    .sidebar::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 10px;
-    }
-    
-    .sidebar::-webkit-scrollbar-thumb:hover {
-      background: #a8a8a8;
-    }
-    
-    .main-content::-webkit-scrollbar-thumb {
+    body::-webkit-scrollbar-thumb {
       background: var(--primary-color);
       border-radius: 10px;
     }
     
-    .main-content::-webkit-scrollbar-thumb:hover {
+    body::-webkit-scrollbar-thumb:hover {
       background: var(--secondary-color);
     }
 
     /* Responsive Adjustments */
     @media (max-width: 768px) {
-      .sidebar {
-        width: 70px;
+      body {
+        padding: 15px;
       }
       
-      .logo-text, .nav-link span {
-        display: none;
-      }
-      
-      .main-content {
-        margin-left: 70px;
+      .header-container {
+        flex-direction: column;
+        text-align: center;
         padding: 20px;
+      }
+      
+      .header-left {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .subject-info {
+        padding-left: 0;
+        border-left: none;
+        border-top: 2px solid #e9ecef;
+        padding-top: 10px;
+      }
+      
+      .header-actions {
+        justify-content: center;
       }
       
       .results-header,
@@ -595,230 +552,240 @@
       .action-btn {
         justify-content: center;
       }
+      
+      .question-header {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .question-status {
+        align-self: flex-start;
+      }
+    }
+
+    @media (max-width: 576px) {
+      body {
+        padding: 10px;
+      }
+      
+      .header-container {
+        padding: 15px;
+      }
+      
+      .results-header,
+      .score-summary,
+      .performance-analysis,
+      .results-content {
+        padding: 15px;
+      }
+      
+      .score-circle {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .score-percent {
+        font-size: 28px;
+      }
+      
+      .question-text {
+        font-size: 15px;
+      }
+      
+      .action-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+      }
+      
+      .answer-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+      
+      .answer-label {
+        min-width: auto;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Enhanced Sidebar Navigation -->
-  <div class="sidebar">
-    <div class="sidebar-header">
+  <!-- Header with Navigation -->
+  <div class="header-container">
+    <div class="header-left">
       <div class="logo">
         <div class="logo-icon">
           <i class="fas fa-brain"></i>
         </div>
         <div class="logo-text">StudyBuddy AI</div>
       </div>
-    </div>
-    
-    <div class="nav flex-column">
-      <div class="nav-item">
-        <a href="{{ url_for('dashboard') }}" class="nav-link">
-          <i class="fas fa-home"></i>
-          <span>Dashboard</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('subjects') }}" class="nav-link">
-          <i class="fas fa-book"></i>
-          <span>My Subjects</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('subject_detail', subject_id=subject.subject_id) }}" class="nav-link">
-          <i class="fas fa-file-alt"></i>
-          <span>{{ subject.subject_name[:15] }}{% if subject.subject_name|length > 15 %}...{% endif %}</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('subject_chat', subject_id=subject.subject_id) }}" class="nav-link">
-          <i class="fas fa-robot"></i>
-          <span>AI Assistant</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('generate_quiz_ai', subject_id=subject.subject_id) }}" class="nav-link">
-          <i class="fas fa-question-circle"></i>
-          <span>Take Quiz</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('subject_progress', subject_id=subject.subject_id) }}" class="nav-link">
-          <i class="fas fa-chart-line"></i>
-          <span>Learning Path</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('progress_overview') }}" class="nav-link">
-          <i class="fas fa-chart-pie"></i>
-          <span>Progress Overview</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">
-          <i class="fas fa-cog"></i>
-          <span>Settings</span>
-        </a>
+      <div class="subject-info">
+        <h3 class="subject-name">{{ subject.subject_name }}</h3>
+        <small class="text-muted">Quiz Results</small>
       </div>
     </div>
     
-    <div class="logout-section">
-      <a href="{{ url_for('logout') }}" class="logout-link">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Logout</span>
+    <div class="header-actions">
+      <a href="{{ url_for('dashboard') }}" class="header-btn">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a href="{{ url_for('subjects') }}" class="header-btn">
+        <i class="fas fa-book"></i> My Subjects
+      </a>
+      <a href="{{ url_for('subject_detail', subject_id=subject.subject_id) }}" class="header-btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Back to Subject
       </a>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <div class="results-container">
-      <!-- Results Header -->
-      <div class="results-header">
-        <div class="results-title">
-          <h2>
-            <i class="fas fa-check-circle text-success"></i>
-            {{ subject.subject_name }} Quiz Results
-          </h2>
-        </div>
-        <div class="results-subtitle">
-          <p>Detailed analysis of your quiz performance</p>
-        </div>
+  <!-- Results Container -->
+  <div class="results-container">
+    <!-- Results Header -->
+    <div class="results-header">
+      <div class="results-title">
+        <h2>
+          <i class="fas fa-check-circle text-success"></i>
+          {{ subject.subject_name }} Quiz Results
+        </h2>
       </div>
+      <div class="results-subtitle">
+        <p>Detailed analysis of your quiz performance</p>
+      </div>
+    </div>
 
-      <!-- Score Summary -->
-      <div class="score-summary">
-        <div class="score-circle">
-          <div class="score-percent">{{ "%.0f"|format((score/total)*100) }}%</div>
-          <div class="score-label">Accuracy</div>
+    <!-- Score Summary -->
+    <div class="score-summary">
+      <div class="score-circle">
+        <div class="score-percent">{{ "%.0f"|format((score/total)*100) }}%</div>
+        <div class="score-label">Accuracy</div>
+      </div>
+      
+      <div class="score-details">
+        <div class="score-card">
+          <div class="score-value">{{ score }}/{{ total }}</div>
+          <div class="score-type">Questions Correct</div>
         </div>
         
-        <div class="score-details">
-          <div class="score-card">
-            <div class="score-value">{{ score }}/{{ total }}</div>
-            <div class="score-type">Questions Correct</div>
-          </div>
-          
-          <div class="score-card">
-            <div class="score-value">{{ total - score }}</div>
-            <div class="score-type">Questions Incorrect</div>
-          </div>
-          
-          <div class="score-card">
-            <div class="score-value">
-              {% if (score/total)*100 >= 80 %}
-                Excellent
-              {% elif (score/total)*100 >= 60 %}
-                Good
-              {% elif (score/total)*100 >= 40 %}
-                Average
-              {% else %}
-                Needs Improvement
-              {% endif %}
-            </div>
-            <div class="score-type">Performance Level</div>
-          </div>
+        <div class="score-card">
+          <div class="score-value">{{ total - score }}</div>
+          <div class="score-type">Questions Incorrect</div>
         </div>
-      </div>
-
-      <!-- Performance Analysis -->
-      <div class="performance-analysis">
-        <h3 class="analysis-title">
-          <i class="fas fa-chart-bar text-primary"></i>
-          Performance Analysis
-        </h3>
         
-        <div class="performance-grid">
-          <div class="performance-card">
-            <div class="performance-title">
-              <i class="fas fa-bolt text-warning"></i>
-              Speed & Accuracy
-            </div>
-            <div class="performance-value">
-              {% if (score/total)*100 >= 80 %}
-                Fast & Accurate
-              {% elif (score/total)*100 >= 60 %}
-                Steady Progress
-              {% else %}
-                Take Your Time
-              {% endif %}
-            </div>
+        <div class="score-card">
+          <div class="score-value">
+            {% if (score/total)*100 >= 80 %}
+              Excellent
+            {% elif (score/total)*100 >= 60 %}
+              Good
+            {% elif (score/total)*100 >= 40 %}
+              Average
+            {% else %}
+              Needs Improvement
+            {% endif %}
           </div>
-          
-          <div class="performance-card">
-            <div class="performance-title">
-              <i class="fas fa-trend-up text-success"></i>
-              Improvement Areas
-            </div>
-            <div class="performance-value">
-              {% if total - score == 0 %}
-                Mastered!
-              {% elif total - score <= 2 %}
-                Minor Refinement
-              {% else %}
-                Focus Needed
-              {% endif %}
-            </div>
+          <div class="score-type">Performance Level</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Analysis -->
+    <div class="performance-analysis">
+      <h3 class="analysis-title">
+        <i class="fas fa-chart-bar text-primary"></i>
+        Performance Analysis
+      </h3>
+      
+      <div class="performance-grid">
+        <div class="performance-card">
+          <div class="performance-title">
+            <i class="fas fa-bolt text-warning"></i>
+            Speed & Accuracy
+          </div>
+          <div class="performance-value">
+            {% if (score/total)*100 >= 80 %}
+              Fast & Accurate
+            {% elif (score/total)*100 >= 60 %}
+              Steady Progress
+            {% else %}
+              Take Your Time
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="performance-card">
+          <div class="performance-title">
+            <i class="fas fa-trend-up text-success"></i>
+            Improvement Areas
+          </div>
+          <div class="performance-value">
+            {% if total - score == 0 %}
+              Mastered!
+            {% elif total - score <= 2 %}
+              Minor Refinement
+            {% else %}
+              Focus Needed
+            {% endif %}
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Results Content -->
-      <div class="results-content">
-        <h3 class="results-title-section">
-          <i class="fas fa-list-check text-primary"></i>
-          Question-by-Question Results
-        </h3>
+    <!-- Results Content -->
+    <div class="results-content">
+      <h3 class="results-title-section">
+        <i class="fas fa-list-check text-primary"></i>
+        Question-by-Question Results
+      </h3>
 
-        {% for r in results %}
-          <div class="question-result {% if r.is_correct %}correct{% else %}incorrect{% endif %}">
-            <div class="question-header">
-              <div class="question-number">{{ loop.index }}</div>
-              <div class="question-text">{{ r.question }}</div>
-              <div class="question-status {% if r.is_correct %}status-correct{% else %}status-incorrect{% endif %}">
-                {% if r.is_correct %}
-                  <i class="fas fa-check-circle"></i> Correct
-                {% else %}
-                  <i class="fas fa-times-circle"></i> Incorrect
-                {% endif %}
-              </div>
-            </div>
-            
-            <div class="answer-section">
+      {% for r in results %}
+        <div class="question-result {% if r.is_correct %}correct{% else %}incorrect{% endif %}">
+          <div class="question-header">
+            <div class="question-number">{{ loop.index }}</div>
+            <div class="question-text">{{ r.question }}</div>
+            <div class="question-status {% if r.is_correct %}status-correct{% else %}status-incorrect{% endif %}">
               {% if r.is_correct %}
-                <div class="answer-row answer-correct">
-                  <div class="answer-label">Your Answer:</div>
-                  <div class="answer-text">{{ r.selected }}</div>
-                </div>
+                <i class="fas fa-check-circle"></i> Correct
               {% else %}
-                <div class="answer-row answer-incorrect">
-                  <div class="answer-label">Your Answer:</div>
-                  <div class="answer-text">{{ r.selected or "Not answered" }}</div>
-                </div>
-                <div class="answer-row answer-correct">
-                  <div class="answer-label">Correct Answer:</div>
-                  <div class="answer-text"><strong>{{ r.correct }}</strong></div>
-                </div>
+                <i class="fas fa-times-circle"></i> Incorrect
               {% endif %}
             </div>
           </div>
-        {% endfor %}
-      </div>
+          
+          <div class="answer-section">
+            {% if r.is_correct %}
+              <div class="answer-row answer-correct">
+                <div class="answer-label">Your Answer:</div>
+                <div class="answer-text">{{ r.selected }}</div>
+              </div>
+            {% else %}
+              <div class="answer-row answer-incorrect">
+                <div class="answer-label">Your Answer:</div>
+                <div class="answer-text">{{ r.selected or "Not answered" }}</div>
+              </div>
+              <div class="answer-row answer-correct">
+                <div class="answer-label">Correct Answer:</div>
+                <div class="answer-text"><strong>{{ r.correct }}</strong></div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
 
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <a href="{{ url_for('subject_progress', subject_id=subject.subject_id) }}" class="action-btn btn-primary">
-          <i class="fas fa-chart-line"></i>
-          View Performance Analytics
-        </a>
-        <a href="{{ url_for('generate_quiz_ai', subject_id=subject.subject_id) }}" class="action-btn">
-          <i class="fas fa-redo"></i>
-          Retake Quiz
-        </a>
-        <a href="{{ url_for('subject_detail', subject_id=subject.subject_id) }}" class="action-btn">
-          <i class="fas fa-arrow-left"></i>
-          Back to Subject
-        </a>
-      </div>
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a href="{{ url_for('subject_progress', subject_id=subject.subject_id) }}" class="action-btn btn-primary">
+        <i class="fas fa-chart-line"></i>
+        View Performance Analytics
+      </a>
+      <a href="{{ url_for('generate_quiz_ai', subject_id=subject.subject_id) }}" class="action-btn">
+        <i class="fas fa-redo"></i>
+        Retake Quiz
+      </a>
+      <a href="{{ url_for('subject_detail', subject_id=subject.subject_id) }}" class="action-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Subject
+      </a>
     </div>
   </div>
 

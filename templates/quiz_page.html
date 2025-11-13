@@ -28,34 +28,33 @@
       background: linear-gradient(135deg, #f0f2f5 0%, #e6e9f0 100%);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
-      display: flex;
+      padding: 20px;
     }
 
-    /* Enhanced Sidebar */
-    .sidebar {
-      width: 280px;
+    /* Header */
+    .quiz-header-container {
       background: white;
-      box-shadow: 5px 0 15px rgba(0, 0, 0, 0.08);
-      height: 100vh;
-      position: fixed;
-      padding: 25px 0;
-      z-index: 100;
-      overflow-y: auto;
-      transform-style: preserve-3d;
-      perspective: 1000px;
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+      padding: 20px 30px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
     }
 
-    .sidebar-header {
-      padding: 0 25px 25px;
-      border-bottom: 1px solid #e9ecef;
-      margin-bottom: 20px;
-      transform: translateZ(20px);
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .logo-icon {
@@ -79,57 +78,53 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .nav-item {
-      margin-bottom: 5px;
+    .subject-info {
+      padding-left: 15px;
+      border-left: 2px solid #e9ecef;
     }
 
-    .nav-link {
+    .subject-name {
+      font-weight: 600;
+      color: var(--secondary-color);
+      margin: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-btn {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-size: 14px;
+      text-decoration: none;
+      color: #495057;
+      transition: all 0.3s;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 25px;
+      gap: 5px;
+    }
+
+    .header-btn:hover {
+      background: #e9ecef;
       color: #495057;
       text-decoration: none;
-      transition: all 0.3s;
-      border-left: 3px solid transparent;
-      position: relative;
-      overflow: hidden;
+      transform: translateY(-1px);
     }
 
-    .nav-link::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
+    .btn-primary {
       background: var(--gradient);
-      opacity: 0.1;
-      transition: left 0.3s;
+      color: white;
+      border-color: var(--primary-color);
     }
 
-    .nav-link:hover::before, .nav-link.active::before {
-      left: 0;
-    }
-
-    .nav-link:hover, .nav-link.active {
-      background: rgba(67, 97, 238, 0.05);
-      color: var(--primary-color);
-      border-left: 3px solid var(--primary-color);
-      transform: translateX(5px);
-    }
-
-    .nav-link i {
-      width: 20px;
-      text-align: center;
-    }
-
-    .main-content {
-      flex: 1;
-      margin-left: 280px;
-      padding: 30px;
-      max-height: 100vh;
-      overflow-y: auto;
+    .btn-primary:hover {
+      background: var(--secondary-color);
+      color: white;
     }
 
     /* Quiz Container */
@@ -411,6 +406,7 @@
       gap: 8px;
       text-decoration: none;
       color: #495057;
+      cursor: pointer;
     }
 
     .nav-btn:hover {
@@ -451,6 +447,7 @@
       gap: 8px;
       text-decoration: none;
       color: var(--primary-color);
+      cursor: pointer;
     }
 
     .action-btn:hover {
@@ -490,89 +487,51 @@
       color: #d63031;
     }
 
-    /* Logout Section */
-    .logout-section {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #e9ecef;
-      text-align: center;
-    }
-
-    .logout-link {
-      color: #dc3545;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .logout-link::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: rgba(220, 53, 69, 0.1);
-      transition: left 0.3s;
-    }
-
-    .logout-link:hover::before {
-      left: 0;
-    }
-
-    .logout-link:hover {
-      color: #c82333;
-      transform: translateX(3px);
-    }
-
     /* Custom scrollbar */
-    .sidebar::-webkit-scrollbar,
-    .main-content::-webkit-scrollbar {
-      width: 6px;
+    body::-webkit-scrollbar {
+      width: 8px;
     }
     
-    .sidebar::-webkit-scrollbar-track,
-    .main-content::-webkit-scrollbar-track {
+    body::-webkit-scrollbar-track {
       background: #f1f1f1;
       border-radius: 10px;
     }
     
-    .sidebar::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 10px;
-    }
-    
-    .sidebar::-webkit-scrollbar-thumb:hover {
-      background: #a8a8a8;
-    }
-    
-    .main-content::-webkit-scrollbar-thumb {
+    body::-webkit-scrollbar-thumb {
       background: var(--primary-color);
       border-radius: 10px;
     }
     
-    .main-content::-webkit-scrollbar-thumb:hover {
+    body::-webkit-scrollbar-thumb:hover {
       background: var(--secondary-color);
     }
 
     /* Responsive Adjustments */
     @media (max-width: 768px) {
-      .sidebar {
-        width: 70px;
+      body {
+        padding: 15px;
       }
       
-      .logo-text, .nav-link span {
-        display: none;
-      }
-      
-      .main-content {
-        margin-left: 70px;
+      .quiz-header-container {
+        flex-direction: column;
+        text-align: center;
         padding: 20px;
+      }
+      
+      .header-left {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .subject-info {
+        padding-left: 0;
+        border-left: none;
+        border-top: 2px solid #e9ecef;
+        padding-top: 10px;
+      }
+      
+      .header-actions {
+        justify-content: center;
       }
       
       .quiz-header,
@@ -594,167 +553,160 @@
         width: 100%;
         justify-content: center;
       }
+      
+      .quiz-actions {
+        flex-direction: column;
+      }
+      
+      .action-btn {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 576px) {
+      body {
+        padding: 10px;
+      }
+      
+      .quiz-header-container {
+        padding: 15px;
+      }
+      
+      .quiz-header,
+      .quiz-content {
+        padding: 15px;
+      }
+      
+      .question-text {
+        font-size: 16px;
+      }
+      
+      .option {
+        padding: 15px;
+      }
+      
+      .nav-btn,
+      .action-btn {
+        padding: 10px 15px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Enhanced Sidebar Navigation -->
-  <div class="sidebar">
-    <div class="sidebar-header">
+  <!-- Header with Navigation -->
+  <div class="quiz-header-container">
+    <div class="header-left">
       <div class="logo">
         <div class="logo-icon">
           <i class="fas fa-brain"></i>
         </div>
         <div class="logo-text">StudyBuddy AI</div>
       </div>
-    </div>
-    
-    <div class="nav flex-column">
-      <div class="nav-item">
-        <a href="{{ url_for('dashboard') }}" class="nav-link">
-          <i class="fas fa-home"></i>
-          <span>Dashboard</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('subjects') }}" class="nav-link">
-          <i class="fas fa-book"></i>
-          <span>My Subjects</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('subject_detail', subject_id=subject.subject_id) }}" class="nav-link">
-          <i class="fas fa-file-alt"></i>
-          <span>{{ subject.subject_name[:15] }}{% if subject.subject_name|length > 15 %}...{% endif %}</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('subject_chat', subject_id=subject.subject_id) }}" class="nav-link">
-          <i class="fas fa-robot"></i>
-          <span>AI Assistant</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('generate_quiz_ai', subject_id=subject.subject_id) }}" class="nav-link active">
-          <i class="fas fa-question-circle"></i>
-          <span>Take Quiz</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('subject_progress', subject_id=subject.subject_id) }}" class="nav-link">
-          <i class="fas fa-chart-line"></i>
-          <span>Learning Path</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="{{ url_for('progress_overview') }}" class="nav-link">
-          <i class="fas fa-chart-pie"></i>
-          <span>Progress Overview</span>
-        </a>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">
-          <i class="fas fa-cog"></i>
-          <span>Settings</span>
-        </a>
+      <div class="subject-info">
+        <h3 class="subject-name">{{ subject.subject_name }}</h3>
+        <small class="text-muted">Interactive Quiz</small>
       </div>
     </div>
     
-    <div class="logout-section">
-      <a href="{{ url_for('logout') }}" class="logout-link">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Logout</span>
+    <div class="header-actions">
+      <a href="{{ url_for('dashboard') }}" class="header-btn">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a href="{{ url_for('subjects') }}" class="header-btn">
+        <i class="fas fa-book"></i> My Subjects
+      </a>
+      <a href="{{ url_for('subject_detail', subject_id=subject.subject_id) }}" class="header-btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Back to Subject
       </a>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <div class="quiz-container">
-      <!-- Quiz Header -->
-      <div class="quiz-header">
-        <div class="quiz-title">
-          <h2>
-            <i class="fas fa-question-circle"></i>
-            {{ subject.subject_name }} Quiz
-          </h2>
-        </div>
-        <div class="quiz-subtitle">
-          <p>Test your knowledge and track your progress with this AI-generated quiz</p>
-        </div>
+  <!-- Quiz Container -->
+  <div class="quiz-container">
+    <!-- Quiz Header -->
+    <div class="quiz-header">
+      <div class="quiz-title">
+        <h2>
+          <i class="fas fa-question-circle"></i>
+          {{ subject.subject_name }} Quiz
+        </h2>
       </div>
-
-      <!-- Quiz Progress -->
-      <div class="quiz-progress">
-        <div class="progress-info">
-          <div class="progress-text">Quiz Progress</div>
-          <div class="progress-stats" id="progressStats">Question 1 of {{ questions|length }}</div>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill" style="width: {{ (1/questions|length)*100 }}%"></div>
-        </div>
+      <div class="quiz-subtitle">
+        <p>Test your knowledge and track your progress with this AI-generated quiz</p>
       </div>
+    </div>
 
-      <!-- Quiz Timer -->
-      <div class="quiz-timer">
-        <i class="fas fa-clock text-warning"></i>
-        <span class="timer-text">Time Remaining:</span>
-        <span class="timer-display" id="timerDisplay">30:00</span>
+    <!-- Quiz Progress -->
+    <div class="quiz-progress">
+      <div class="progress-info">
+        <div class="progress-text">Quiz Progress</div>
+        <div class="progress-stats" id="progressStats">Question 1 of {{ questions|length }}</div>
       </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: {{ (1/questions|length)*100 }}%"></div>
+      </div>
+    </div>
 
-      <!-- Quiz Content -->
-      <div class="quiz-content">
-        <form id="quizForm" method="POST" action="{{ url_for('generate_quiz', subject_id=subject.subject_id) }}">
-          <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-          <input type="hidden" id="scoreInput" name="score">
-          <input type="hidden" id="totalInput" name="total" value="{{ questions|length }}">
+    <!-- Quiz Timer -->
+    <div class="quiz-timer">
+      <i class="fas fa-clock text-warning"></i>
+      <span class="timer-text">Time Remaining:</span>
+      <span class="timer-display" id="timerDisplay">30:00</span>
+    </div>
 
-          {% for q in questions %}
-            {% set qindex = loop.index %}
-            <div class="question-container" id="question{{ qindex }}" {% if qindex != 1 %}style="display: none;"{% endif %}>
-              <div class="question-header">
-                <div class="question-number">{{ qindex }}</div>
-                <div class="question-text">{{ q['question'] }}</div>
-                <div class="question-actions">
-                  <button type="button" class="question-btn" onclick="markForReview({{ qindex }})">
-                    <i class="fas fa-flag"></i> Review
-                  </button>
-                </div>
-              </div>
-              
-              <div class="options-container">
-                {% for opt in q['options'] %}
-                  <div class="option" onclick="selectOption(this, {{ qindex }})" data-value="{{ opt }}">
-                    <div class="option-radio"></div>
-                    <div class="option-text">{{ opt }}</div>
-                    <input type="radio" name="q{{ qindex }}" value="{{ opt }}" hidden>
-                  </div>
-                {% endfor %}
+    <!-- Quiz Content -->
+    <div class="quiz-content">
+      <form id="quizForm" method="POST" action="{{ url_for('generate_quiz', subject_id=subject.subject_id) }}">
+        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+        <input type="hidden" id="scoreInput" name="score">
+        <input type="hidden" id="totalInput" name="total" value="{{ questions|length }}">
+
+        {% for q in questions %}
+          {% set qindex = loop.index %}
+          <div class="question-container" id="question{{ qindex }}" {% if qindex != 1 %}style="display: none;"{% endif %}>
+            <div class="question-header">
+              <div class="question-number">{{ qindex }}</div>
+              <div class="question-text">{{ q['question'] }}</div>
+              <div class="question-actions">
+                <button type="button" class="question-btn" onclick="markForReview({{ qindex }})">
+                  <i class="fas fa-flag"></i> Review
+                </button>
               </div>
             </div>
-          {% endfor %}
-
-          <!-- Quiz Navigation -->
-          <div class="quiz-navigation">
-            <button type="button" class="nav-btn" id="prevBtn" onclick="previousQuestion()" style="display: none;">
-              <i class="fas fa-arrow-left"></i> Previous
-            </button>
             
-            <div class="quiz-actions">
-              <a href="{{ url_for('subject_detail', subject_id=subject.subject_id) }}" class="action-btn">
-                <i class="fas fa-times"></i> Cancel Quiz
-              </a>
-              <button type="button" class="action-btn btn-primary" onclick="calculateScore()">
-                <i class="fas fa-paper-plane"></i> Submit Quiz
-              </button>
+            <div class="options-container">
+              {% for opt in q['options'] %}
+                <div class="option" onclick="selectOption(this, {{ qindex }})" data-value="{{ opt }}">
+                  <div class="option-radio"></div>
+                  <div class="option-text">{{ opt }}</div>
+                  <input type="radio" name="q{{ qindex }}" value="{{ opt }}" hidden>
+                </div>
+              {% endfor %}
             </div>
+          </div>
+        {% endfor %}
 
-            <button type="button" class="nav-btn" id="nextBtn" onclick="nextQuestion()">
-              Next <i class="fas fa-arrow-right"></i>
+        <!-- Quiz Navigation -->
+        <div class="quiz-navigation">
+          <button type="button" class="nav-btn" id="prevBtn" onclick="previousQuestion()" style="display: none;">
+            <i class="fas fa-arrow-left"></i> Previous
+          </button>
+          
+          <div class="quiz-actions">
+            <a href="{{ url_for('subject_detail', subject_id=subject.subject_id) }}" class="action-btn">
+              <i class="fas fa-times"></i> Cancel Quiz
+            </a>
+            <button type="button" class="action-btn btn-primary" onclick="calculateScore()">
+              <i class="fas fa-paper-plane"></i> Submit Quiz
             </button>
           </div>
-        </form>
-      </div>
+
+          <button type="button" class="nav-btn" id="nextBtn" onclick="nextQuestion()">
+            Next <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
