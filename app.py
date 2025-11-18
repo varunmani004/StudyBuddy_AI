@@ -1,22 +1,19 @@
+# app.py (updated & fixed)
 # ==============================================================
 # 📘 STUDYBUDDY AI — PHASE 4 (Quiz + Learning Curve Tracker)
-# Function: User system + Subject upload + AI Q&A chat + Quiz tracking
 # ==============================================================
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import pymysql, re, os, json, textwrap
 from datetime import datetime, date
 from werkzeug.utils import secure_filename
-from text_extraction import extract_text
+from modules.text_extraction import extract_text
 from modules.vector_store import add_text_file_to_vector_db, get_vector_store
 from modules.chat_ai import get_ai_response_for_subject
-from langchain_ollama import OllamaLLM
-from datetime import date
 
-
-# ==============================================================
+# ============================================================== 
 # 🔹 FLASK APP CONFIGURATION
-# ==============================================================
+# ============================================================== 
 app = Flask(__name__)
 app.secret_key = "studybuddy_secret_key_2025"
 app.config["UPLOAD_FOLDER"] = "static/uploads"
@@ -31,9 +28,9 @@ for folder in [
     os.makedirs(folder, exist_ok=True)
 
 
-# ==============================================================
+# ============================================================== 
 # ⚙️ DATABASE CONNECTION
-# ==============================================================
+# ============================================================== 
 def get_db_connection():
     return pymysql.connect(
         host="trolley.proxy.rlwy.net",
@@ -44,6 +41,7 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
+
 @app.route("/testdb")
 def test_db():
     try:
@@ -51,15 +49,15 @@ def test_db():
         with conn.cursor() as cur:
             cur.execute("SELECT NOW();")
             result = cur.fetchone()
+        conn.close()
         return f"✅ Connected to MySQL! Time: {result}"
     except Exception as e:
         return f"❌ Error: {e}"
 
 
-
-# ==============================================================
+# ============================================================== 
 # 🏠 HOME + AUTH SYSTEM
-# ==============================================================
+# ============================================================== 
 @app.route("/")
 def home():
     return redirect(url_for("login"))
@@ -90,9 +88,9 @@ def register():
                 (username, email, password),
             )
             conn.commit()
-            flash("✅ Registration successful! Please login.", "success")
             cursor.close()
             conn.close()
+            flash("✅ Registration successful! Please login.", "success")
             return redirect(url_for("login"))
 
         cursor.close()
@@ -127,6 +125,9 @@ def login():
     return render_template("login.html", msg=msg)
 
 
+# ============================================================== 
+# 📊 DASHBOARD
+# ============================================================== 
 @app.route("/dashboard")
 def dashboard():
     if "loggedin" not in session:
@@ -138,11 +139,9 @@ def dashboard():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Fetch all subjects
     cursor.execute("SELECT * FROM subjects WHERE user_id=%s", (user_id,))
     subjects = cursor.fetchall()
 
-    # Fetch quiz performance for each subject
     subject_progress = []
     for subj in subjects:
         cursor.execute("""
@@ -155,6 +154,7 @@ def dashboard():
         stats = cursor.fetchone() or {}
         total = (stats["correct"] or 0) + (stats["wrong"] or 0)
         success = round((stats["correct"] / total * 100), 1) if total > 0 else 0
+
         subject_progress.append({
             "id": subj["subject_id"],
             "name": subj["subject_name"],
@@ -172,17 +172,19 @@ def dashboard():
     )
 
 
-
-@app.route("/logout")   
+# ============================================================== 
+# LOGOUT
+# ============================================================== 
+@app.route("/logout")
 def logout():
     session.clear()
     flash("You have been logged out!", "info")
     return redirect(url_for("login"))
 
 
-# ==============================================================
+# ============================================================== 
 # 📚 SUBJECT MANAGEMENT
-# ==============================================================
+# ============================================================== 
 @app.route("/subjects")
 def subjects():
     if "loggedin" not in session:
@@ -232,9 +234,9 @@ def delete_subject(id):
     return redirect(url_for("subjects"))
 
 
-# ==============================================================
+# ============================================================== 
 # 📂 SUBJECT DETAIL PAGE
-# ==============================================================
+# ============================================================== 
 def get_subject(subject_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -265,8 +267,7 @@ def subject_upload(subject_id):
     if "loggedin" not in session:
         return redirect(url_for("login"))
 
-    subject = get_subject(subject_id)
-    file = request.files["file"]
+    file = request.files.get("file")
     if not file or file.filename == "":
         flash("No file selected!", "warning")
         return redirect(url_for("subject_detail", subject_id=subject_id))
@@ -277,11 +278,37 @@ def subject_upload(subject_id):
     save_path = os.path.join(subject_dir, filename)
     file.save(save_path)
 
-    extracted_path = extract_text(save_path)
-    os.makedirs(f"static/uploads/processed_texts/{subject_id}", exist_ok=True)
-    processed_dest = os.path.join(f"static/uploads/processed_texts/{subject_id}", os.path.basename(extracted_path))
-    os.replace(extracted_path, processed_dest)
-    add_text_file_to_vector_db(processed_dest, subject_id)
+    # IMPORTANT FIX: extract_text expects (file_path, subject_id)
+    try:
+        extracted_path = extract_text(save_path, subject_id)
+        if not extracted_path:
+            flash("⚠️ Could not extract text from this file (unsupported format).", "warning")
+            # cleanup maybe
+            return redirect(url_for("subject_detail", subject_id=subject_id))
+
+        # Move/ensure processed path is inside correct folder (extract_text already writes there,
+        # but keeping robust move in case extract_text wrote to a different temp path)
+        processed_dir = os.path.join("static", "uploads", "processed_texts", str(subject_id))
+        os.makedirs(processed_dir, exist_ok=True)
+        processed_dest = os.path.join(processed_dir, os.path.basename(extracted_path))
+        if os.path.abspath(extracted_path) != os.path.abspath(processed_dest):
+            try:
+                os.replace(extracted_path, processed_dest)
+            except Exception:
+                # if move fails, continue with original path
+                processed_dest = extracted_path
+
+        add_text_file_to_vector_db(processed_dest, subject_id)
+
+    except TypeError as te:
+        # If someone calls an old extract_text signature, show helpful error
+        print("extract_text signature error:", te)
+        flash("⚠️ Text extraction failed due to internal function signature mismatch.", "danger")
+        return redirect(url_for("subject_detail", subject_id=subject_id))
+    except Exception as e:
+        print("Text extraction error:", e)
+        flash(f"❌ Text extraction failed: {e}", "danger")
+        return redirect(url_for("subject_detail", subject_id=subject_id))
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -293,9 +320,11 @@ def subject_upload(subject_id):
     conn.close()
     flash("✅ File uploaded and indexed successfully!", "success")
     return redirect(url_for("subject_detail", subject_id=subject_id))
-# ==============================================================
+
+
+# ============================================================== 
 # ✏️ EDIT SUBJECT
-# ==============================================================
+# ============================================================== 
 @app.route("/edit_subject/<int:subject_id>", methods=["POST"])
 def edit_subject(subject_id):
     if "loggedin" not in session:
@@ -316,9 +345,10 @@ def edit_subject(subject_id):
     flash("✏️ Subject updated successfully!", "info")
     return redirect(url_for("subjects"))
 
-# ==============================================================
-# 🗑 DELETE FILE (Fix for subject_detail.html)
-# ==============================================================
+
+# ============================================================== 
+# 🗑 DELETE FILE
+# ============================================================== 
 @app.route("/delete_file/<int:file_id>", methods=["POST"])
 def delete_file(file_id):
     if "loggedin" not in session:
@@ -345,10 +375,9 @@ def delete_file(file_id):
         return redirect(url_for("subjects"))
 
 
-
-# ==============================================================
+# ============================================================== 
 # 💬 SUBJECT CHAT
-# ==============================================================
+# ============================================================== 
 @app.route("/subjects/<int:subject_id>/chat", methods=["GET", "POST"])
 def subject_chat(subject_id):
     if "loggedin" not in session:
@@ -361,9 +390,9 @@ def subject_chat(subject_id):
     return render_template("chat_subject.html", subject=subject, ai_reply=ai_reply, user_msg=user_msg)
 
 
-# ==============================================================
-# 🧠 QUIZ GENERATION + NORMALIZATION
-# ==============================================================
+# ============================================================== 
+# 🧠 QUIZ GENERATION (OpenRouter-only, robust)
+# ============================================================== 
 @app.route("/subjects/<int:subject_id>/generate_quiz_ai")
 def generate_quiz_ai(subject_id):
     if "loggedin" not in session:
@@ -372,107 +401,118 @@ def generate_quiz_ai(subject_id):
     user_id = session["user_id"]
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # Get subject
     cursor.execute("SELECT * FROM subjects WHERE subject_id=%s", (subject_id,))
     subject = cursor.fetchone()
 
+    # Load processed notes
     text_dir = f"static/uploads/processed_texts/{subject_id}"
     combined_text = ""
     if os.path.exists(text_dir):
         for fname in os.listdir(text_dir):
-            if fname.endswith(".txt"):
+            if fname.lower().endswith(".txt"):
                 with open(os.path.join(text_dir, fname), "r", encoding="utf-8") as f:
                     combined_text += f.read() + "\n"
 
     if not combined_text.strip():
         flash("⚠️ No processed notes found. Upload notes first.", "warning")
+        conn.close()
         return redirect(url_for("subject_detail", subject_id=subject_id))
 
+    # Use OpenRouter JSON-only generator (defined in modules/groq_utils.py)
+    from modules.groq_utils import openrouter_json_llm  # this returns a Python list (or empty list)
+
+    prompt = f"""
+Generate exactly 5 MCQ quiz questions from the following notes.
+
+STRICT JSON OUTPUT ONLY in this exact format:
+[
+  {{
+    "question": "....",
+    "options": ["A", "B", "C", "D"],
+    "answer": "A"
+  }},
+  ...
+]
+
+NOTES:
+{combined_text[:7000]}
+"""
+
     try:
-        llm = OllamaLLM(model="phi3:mini")
-        prompt =  f"""
-        You are a quiz generator.
-        Create exactly 5 multiple-choice questions based on the text below.
-        Output only a valid JSON array like this:
-        [
-          {{"question":"...","options":["A","B","C","D"],"answer":"A"}}
-        ]
+        ai_result = openrouter_json_llm(prompt)  # expected: Python list (validated in groq_utils)
 
-        Text:
-        {combined_text[:4000]}
-        """
+        # validate result
+        if not isinstance(ai_result, list) or len(ai_result) == 0:
+            raise ValueError("AI did not return a valid JSON array of questions.")
 
-        ai_output = str(llm.invoke(prompt))
-        print("✅ Raw AI Output (preview):", ai_output[:400])
+        questions_list = ai_result
 
-        start = ai_output.find("[")
-        end = ai_output.rfind("]")
-        json_str = ai_output[start:end+1]
-
-        questions_list = []
-        try:
-            questions_list = json.loads(json_str)
-        except Exception as e:
-            print("⚠️ JSON parse failed:", e)
-            # fallback: try to parse plain text into basic questions
-            lines = [l.strip() for l in ai_output.splitlines() if l.strip()]
-            temp = []
-            q, opts = "", []
-            for line in lines:
-                if re.match(r'^\d+\.', line):  # e.g. "1. What is Java?"
-                    if q and opts:
-                        temp.append({"question": q, "options": opts, "answer": opts[0]})
-                    q = re.sub(r'^\d+\.\s*', '', line)
-                    opts = []
-                elif re.match(r'^[A-D][\).\s-]', line):  # e.g. "A) Option"
-                    opts.append(re.sub(r'^[A-D][\).\s-]+\s*', '', line))
-            if q and opts:
-                temp.append({"question": q, "options": opts, "answer": opts[0]})
-            questions_list = temp
-
-
+        # Basic normalization/validation for each question (defensive)
         normalized = []
         for q in questions_list:
-            opts_raw = q.get("options", [])
-            opts = []
-            for o in opts_raw:
-                if isinstance(o, list) and o:
-                    opts.append(str(o[0]))
-                elif isinstance(o, dict):
-                    opts.append(o.get("text") or o.get("option") or str(o))
-                else:
-                    opts.append(str(o))
-            opts = [o.strip() for o in opts if o.strip()][:4]
-            ans = q.get("answer", "")
-            if len(ans) == 1 and ans.upper() in ["A","B","C","D"]:
-                idx = ord(ans.upper()) - ord("A")
+            q_text = q.get("question") if isinstance(q, dict) else None
+            opts = q.get("options") if isinstance(q, dict) else None
+            ans = q.get("answer") if isinstance(q, dict) else None
+
+            if not q_text or not isinstance(opts, list) or len(opts) < 2:
+                continue  # skip invalid entries
+
+            # ensure exactly 4 options (pad if missing)
+            opts = [str(o).strip() for o in opts][:4]
+            while len(opts) < 4:
+                opts.append("N/A")
+
+            # if answer is A/B/C/D convert to actual option text
+            if isinstance(ans, str) and len(ans.strip()) == 1 and ans.strip().upper() in ["A", "B", "C", "D"]:
+                idx = ord(ans.strip().upper()) - ord("A")
                 if idx < len(opts):
-                    ans = opts[idx]
+                    ans_text = opts[idx]
+                else:
+                    ans_text = opts[0]
+            else:
+                ans_text = str(ans).strip() if ans else opts[0]
+
             normalized.append({
-                "question": q.get("question", "Untitled Question").strip(),
-                "options": opts or ["A","B","C","D"],
-                "answer": ans or (opts[0] if opts else "A"),
+                "question": str(q_text).strip(),
+                "options": opts,
+                "answer": ans_text
             })
 
+        if not normalized:
+            raise ValueError("AI returned no valid questions after normalization.")
+
+        # Save into DB
         cursor.execute("""
             INSERT INTO quizzes (subject_id, user_id, title, questions_json, difficulty)
             VALUES (%s,%s,%s,%s,%s)
-        """, (subject_id, user_id, f"AI Quiz for {subject['subject_name']}",
-              json.dumps(normalized, ensure_ascii=False), "Medium"))
+        """, (
+            subject_id,
+            user_id,
+            f"AI Quiz for {subject['subject_name']}",
+            json.dumps(normalized, ensure_ascii=False),
+            "Medium"
+        ))
         conn.commit()
+        conn.close()
+
         flash("✅ AI quiz generated successfully!", "success")
-        print("💾 Quiz saved successfully!")
         return redirect(url_for("generate_quiz", subject_id=subject_id))
 
     except Exception as e:
-        print("❌ ERROR in AI generation:", e)
+        print("QUIZ ERROR:", e)
+        try:
+            conn.close()
+        except Exception:
+            pass
         flash(f"❌ Quiz generation failed: {e}", "danger")
         return redirect(url_for("subject_detail", subject_id=subject_id))
 
 
-# ==============================================================
-# 📝 QUIZ PAGE + LEARNING CURVE
-# ==============================================================
-
+# ============================================================== 
+# 📝 QUIZ PAGE + RESULT + LEARNING CURVE
+# ============================================================== 
 @app.route("/subjects/<int:subject_id>/quiz", methods=["GET", "POST"])
 def generate_quiz(subject_id):
     if "loggedin" not in session:
@@ -481,11 +521,10 @@ def generate_quiz(subject_id):
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
 
-    # ✅ Load subject details
     cursor.execute("SELECT * FROM subjects WHERE subject_id=%s", (subject_id,))
     subject = cursor.fetchone()
 
-    # 🧩 --- QUIZ SUBMISSION HANDLER ---
+    # POST: user submits quiz
     if request.method == "POST":
         quiz_id = request.form.get("quiz_id")
         total = int(request.form.get("total", 0))
@@ -496,14 +535,14 @@ def generate_quiz(subject_id):
 
         if not quiz:
             flash("Quiz not found!", "danger")
+            cursor.close()
+            conn.close()
             return redirect(url_for("subject_detail", subject_id=subject_id))
 
-        # Parse quiz questions
         questions = json.loads(quiz["questions_json"])
         score = 0
         results = []
 
-        # ✅ Calculate score
         for i, q in enumerate(questions, start=1):
             selected = request.form.get(f"q{i}")
             correct = q.get("answer", "").strip().lower()
@@ -520,14 +559,12 @@ def generate_quiz(subject_id):
         accuracy = round(score / total, 2) if total else 0
 
         try:
-            # 🔹 1. Save quiz results
             cursor.execute("""
                 INSERT INTO quiz_scores (quiz_id, user_id, subject_id, score, total, accuracy)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (quiz_id, user_id, subject_id, score, total, accuracy))
             conn.commit()
 
-            # 🔹 2. Recalculate average accuracy
             cursor.execute("""
                 SELECT AVG(accuracy) AS avg_acc
                 FROM quiz_scores
@@ -535,7 +572,6 @@ def generate_quiz(subject_id):
             """, (user_id, subject_id))
             avg_acc = cursor.fetchone()["avg_acc"] or 0
 
-            # 🔹 3. Upsert learning curve data safely
             cursor.execute("""
                 INSERT INTO learning_curve (user_id, subject_id, date, avg_accuracy, total_study_time, predicted_mastery)
                 VALUES (%s, %s, %s, %s, %s, %s)
@@ -547,13 +583,13 @@ def generate_quiz(subject_id):
 
         except pymysql.MySQLError as e:
             conn.rollback()
-            print("❌ Database error:", e)
-            flash("Something went wrong while saving your quiz results.", "danger")
+            print("DB save error:", e)
+            flash("❌ Something went wrong while saving your quiz results.", "danger")
+
         finally:
             cursor.close()
             conn.close()
 
-        # ✅ Render result page instead of redirect
         return render_template(
             "quiz_result.html",
             subject=subject,
@@ -562,7 +598,7 @@ def generate_quiz(subject_id):
             results=results
         )
 
-    # 🧩 --- QUIZ DISPLAY (GET) ---
+    # GET: show latest quiz
     cursor.execute(
         "SELECT * FROM quizzes WHERE subject_id=%s ORDER BY created_at DESC LIMIT 1",
         (subject_id,)
@@ -572,13 +608,11 @@ def generate_quiz(subject_id):
     conn.close()
 
     if not quiz:
-        flash("No quiz available for this subject yet!", "warning")
+        flash("No quiz available yet!", "warning")
         return redirect(url_for("subject_detail", subject_id=subject_id))
 
     try:
-        questions = json.loads(quiz["questions_json"]) if quiz.get("questions_json") else []
-        if not isinstance(questions, list):
-            questions = [questions]
+        questions = json.loads(quiz["questions_json"])
     except Exception as e:
         print("⚠️ Error decoding quiz JSON:", e)
         questions = []
@@ -586,6 +620,9 @@ def generate_quiz(subject_id):
     return render_template("quiz_page.html", subject=subject, quiz=quiz, questions=questions)
 
 
+# ============================================================== 
+# 📈 SUBJECT PROGRESS PAGE
+# ============================================================== 
 @app.route("/subjects/<int:subject_id>/progress")
 def subject_progress(subject_id):
     if "loggedin" not in session:
@@ -594,6 +631,7 @@ def subject_progress(subject_id):
     user_id = session["user_id"]
     conn = get_db_connection()
     cursor = conn.cursor()
+
     cursor.execute("SELECT * FROM subjects WHERE subject_id=%s", (subject_id,))
     subject = cursor.fetchone()
 
@@ -605,35 +643,37 @@ def subject_progress(subject_id):
     curve_data = cursor.fetchall()
 
     cursor.execute("""
-        SELECT AVG(avg_accuracy) AS avg_acc, COUNT(*) AS attempts
-        FROM learning_curve WHERE user_id=%s AND subject_id=%s
+        SELECT COALESCE(AVG(avg_accuracy), 0) AS avg_acc, COUNT(*) AS attempts
+        FROM learning_curve 
+        WHERE user_id=%s AND subject_id=%s
     """, (user_id, subject_id))
-    perf = cursor.fetchone() or {"avg_acc": 0, "attempts": 0}
+    perf = cursor.fetchone()
+
+    avg_acc = perf["avg_acc"] or 0
+    attempts = perf["attempts"] or 0
 
     conn.close()
 
-    # 🧠 Short personalized message
-    if perf["avg_acc"] >= 80:
-        advice = "Excellent grasp of concepts! Keep refining your skills with complex quizzes."
-    elif perf["avg_acc"] >= 50:
-        advice = "You're improving! Focus on understanding tricky topics through short revisions."
+    if avg_acc >= 80:
+        advice = "Excellent grasp of concepts! Keep refining."
+    elif avg_acc >= 50:
+        advice = "You're improving! Focus on tricky topics."
     else:
-        advice = "Don't worry — focus on reattempting quizzes and reviewing explanations."
+        advice = "Don't worry — revise and reattempt quizzes."
 
-    return render_template("subject_learning_path.html",
-                           subject=subject,
-                           curve_data=curve_data,
-                           avg_acc=perf["avg_acc"],
-                           attempts=perf["attempts"],
-                           advice=advice)
+    return render_template(
+        "subject_learning_path.html",
+        subject=subject,
+        curve_data=curve_data,
+        avg_acc=avg_acc,
+        attempts=attempts,
+        advice=advice
+    )
 
 
-
-
-# ==============================================================
-# Progress dashboard
-# ==============================================================
-
+# ============================================================== 
+# 📊 PROGRESS OVERVIEW PAGE
+# ============================================================== 
 @app.route("/progress_overview")
 def progress_overview():
     if "loggedin" not in session:
@@ -643,11 +683,9 @@ def progress_overview():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Fetch all subjects
     cursor.execute("SELECT * FROM subjects WHERE user_id=%s", (user_id,))
     subjects = cursor.fetchall()
 
-    # For each subject, calculate correct/wrong ratio
     subject_stats = []
     for subj in subjects:
         cursor.execute("""
@@ -655,6 +693,7 @@ def progress_overview():
             FROM quiz_scores WHERE user_id=%s AND subject_id=%s
         """, (user_id, subj["subject_id"]))
         stats = cursor.fetchone() or {}
+        
         total_correct = stats.get("total_correct", 0) or 0
         total_wrong = stats.get("total_wrong", 0) or 0
         total_attempts = total_correct + total_wrong
@@ -672,11 +711,9 @@ def progress_overview():
     return render_template("progress_overview.html", subjects=subject_stats)
 
 
-
-
-# ==============================================================
-# Performance dashboard
-# ==============================================================
+# ============================================================== 
+# 📉 PERFORMANCE DASHBOARD
+# ============================================================== 
 @app.route("/performance")
 def performance_dashboard():
     if "loggedin" not in session:
@@ -685,6 +722,7 @@ def performance_dashboard():
     user_id = session["user_id"]
     conn = get_db_connection()
     cursor = conn.cursor()
+
     cursor.execute("""
         SELECT s.subject_id, s.subject_name, AVG(qs.accuracy) AS avg_accuracy
         FROM subjects s
@@ -692,14 +730,23 @@ def performance_dashboard():
         WHERE s.user_id=%s
         GROUP BY s.subject_id
     """, (user_id, user_id))
-    subjects_perf = cursor.fetchall()
+
+    raw_data = cursor.fetchall()
     conn.close()
-    return render_template("performance_dashboard.html", subjects=subjects_perf)
+
+    subjects = []
+    for row in raw_data:
+        subjects.append({
+            "id": row["subject_id"],
+            "subject_name": row["subject_name"],
+            "avg_accuracy": row["avg_accuracy"] or 0
+        })
+
+    return render_template("performance_dashboard.html", subjects=subjects)
 
 
-
-# ==============================================================
+# ============================================================== 
 # 🚀 RUN SERVER
-# ==============================================================
+# ============================================================== 
 if __name__ == "__main__":
     app.run(debug=True)

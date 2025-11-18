@@ -1,70 +1,80 @@
 # modules/chat_ai.py
-import textwrap
-from langchain_ollama import OllamaLLM
+
+import time
 from modules.vector_store import get_vector_store
+from modules.groq_utils import openrouter_llm     # we reuse this helper only
+
+
+def _build_chat_messages(context: str, query: str) -> list:
+    """
+    Build structured messages for OpenRouter LLM.
+    """
+    system_prompt = (
+        "You are a helpful and concise AI tutor. "
+        "Use the provided context from the student's uploaded notes to answer. "
+        "If the context does not contain the information, reply exactly with: "
+        "\"I don't know based on the given notes.\" "
+        "Keep the explanation simple, clear, and student-friendly."
+    )
+
+    user_prompt = (
+        f"Context:\n{context}\n\n"
+        f"Question:\n{query}\n\n"
+        f"Answer clearly and in simple words:"
+    )
+
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+
 
 def get_ai_response_for_subject(query: str, subject_id: int) -> str:
     """
-    Generate an AI-based response for a subject using local Ollama LLM
-    with retrieved context from that subject’s Chroma vector store.
-    Uses vectorstore.similarity_search(...) for compatibility.
+    MAIN + ONLY MODEL → OpenRouter
+    Uses vector search + DeepSeek/OpenRouter for response.
+    No Groq. No fallback. Clean & stable.
     """
     try:
         print(f"🔹 Generating answer for subject {subject_id} — Query: {query}")
 
-        # 1) Load local Ollama model
-        llm = OllamaLLM(model="tinyllama:latest")
-        print("✅ Ollama model loaded successfully")
-
-        # 2) Load vector store and retrieve similar chunks
+        # ----------------------------------------------
+        # 1️⃣ Load Vector DB & retrieve relevant chunks
+        # ----------------------------------------------
         vectorstore = get_vector_store(subject_id)
-        # Use similarity_search which exists on Chroma-like vectorstores
-        docs = []
+
         try:
             docs = vectorstore.similarity_search(query, k=3)
         except Exception as e:
-            # fallback: if vectorstore exposes as_retriever with a method name
-            try:
-                retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-                # some retrievers may implement 'get_relevant_documents'
-                if hasattr(retriever, "get_relevant_documents"):
-                    docs = retriever.get_relevant_documents(query)
-                elif hasattr(retriever, "get_relevant_texts"):
-                    txts = retriever.get_relevant_texts(query)
-                    docs = [type("D", (), {"page_content": t}) for t in txts]
-                else:
-                    docs = []
-            except Exception:
-                docs = []
+            print("⚠️ Vector search error:", e)
+            docs = []
 
-        context = "\n\n".join([getattr(d, "page_content", str(d)) for d in docs]) if docs else "No relevant context found in uploaded notes."
+        context = (
+            "\n\n".join([getattr(d, "page_content", "") for d in docs])
+            if docs else "No relevant context found in uploaded notes."
+        )
+
         print(f"📚 Retrieved {len(docs)} context chunks")
 
-        # 3) Build a safe tutor-style prompt
-        prompt = textwrap.dedent(f"""
-        You are a helpful AI tutor for students. Use the provided context to answer concisely.
-        If the context does not contain the answer, say "I don't know based on the given notes."
+        # ----------------------------------------------
+        # 2️⃣ Build messages for OpenRouter
+        # ----------------------------------------------
+        messages = _build_chat_messages(context=context, query=query)
 
-        Context:
-        {context}
+        # ----------------------------------------------
+        # 3️⃣ Call OpenRouter API (MAIN MODEL)
+        # ----------------------------------------------
+        print("⚡ Using OpenRouter as primary & only model...")
 
-        Question:
-        {query}
+        answer = openrouter_llm(messages)
 
-        Answer:
-        """).strip()
+        if not answer or answer.strip() == "":
+            print("⚠️ OpenRouter returned empty response")
+            return "⚠️ AI could not generate an answer."
 
-        # 4) Query the model
-        try:
-            ai_output = llm.invoke(prompt)
-        except Exception:
-            # some versions can be called directly
-            ai_output = llm(prompt)
-
-        answer = ai_output if isinstance(ai_output, str) else str(ai_output)
-        print("✅ Final AI Answer (preview):", answer[:300])
+        print("✅ OpenRouter Answer (preview):", answer[:150])
         return answer
 
     except Exception as e:
         print("❌ ERROR in get_ai_response_for_subject:", e)
-        return f"[Error contacting local AI]: {e}"
+        return "⚠️ AI temporarily unavailable."

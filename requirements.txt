@@ -1,28 +1,24 @@
-# --- Core Web Framework ---
 flask
 gunicorn
-
-# --- Database & Data Handling ---
 pymysql
 mysql-connector-python
 pandas
 numpy
-
-# --- NLP / ML / AI ---
 nltk
 spacy
 scikit-learn
-langchain==0.2.14
-langchain-core==0.2.37
-langchain-community==0.2.11
-langchain-ollama==0.1.0
-chromadb==0.5.3
 
-# --- Utilities ---
+# === AI + Vector Engine (Stable Versions) ===
+langchain==0.1.20
+langchain-community==0.0.38
+chromadb==0.4.22
+sentence-transformers
+torch
+
+
+# Other dependencies
 requests
 pypdf
 python-docx
-
-# --- Visualization ---
-matplotlib
-seaborn
+groq
+python-dotenv

@@ -1,79 +1,94 @@
 # ==============================================================
-# 🧠 VECTOR STORE MODULE — StudyBuddy AI (LangChain v1.0+ & Ollama)
+# VECTOR STORE — Chroma + SentenceTransformer (Stable RAG Engine)
 # ==============================================================
 
 import os
-from langchain_community.vectorstores import Chroma
-from langchain_ollama import OllamaEmbeddings  # ✅ Updated import — new official embedding class
-
-# ✅ Use a supported embedding model (works locally with Ollama)
-EMBED_MODEL = "nomic-embed-text"
-
-# Base directory for all vector databases
-VECTOR_DB_DIR = os.path.join("vector_dbs")
-os.makedirs(VECTOR_DB_DIR, exist_ok=True)
+from langchain.vectorstores import Chroma
+from sentence_transformers import SentenceTransformer
 
 
-# -------------------------------------------------------------
-# 🧠 Add a text file into the vector database for a specific subject
-# -------------------------------------------------------------
-def add_text_file_to_vector_db(text_file_path, subject_id):
-    """Add extracted text into a Chroma vector store for a specific subject."""
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+_embedder = None
+
+
+def get_embedder():
+    global _embedder
+    if _embedder is None:
+        _embedder = SentenceTransformer(EMBED_MODEL)
+    return _embedder
+
+
+# ---- Wrapper Class Required By LangChain 0.1.20 ----
+class SentenceTransformerEmbedding:
+    def __init__(self):
+        self.model = get_embedder()
+
+    def embed_documents(self, texts):
+        return self.model.encode(texts).tolist()
+
+    def embed_query(self, text):
+        return self.model.encode([text])[0].tolist()
+
+
+# Root directory
+VECTOR_DB_ROOT = "vector_dbs"
+os.makedirs(VECTOR_DB_ROOT, exist_ok=True)
+
+
+# --------------------------------------------------------------
+# ADD TEXT TO VECTOR DB
+# --------------------------------------------------------------
+def add_text_file_to_vector_db(text_path, subject_id):
     try:
-        with open(text_file_path, "r", encoding="utf-8") as f:
-            text_data = f.read()
+        with open(text_path, "r", encoding="utf-8") as f:
+            text = f.read().strip()
 
-        if not text_data.strip():
-            print(f"⚠️ Empty text file: {text_file_path}")
+        if not text:
+            print("⚠️ No text to embed.")
             return 0
 
-        # ✅ Initialize embeddings with the new class
-        embeddings = OllamaEmbeddings(model=EMBED_MODEL)
+        chunks = [text[i:i+800] for i in range(0, len(text), 800)]
 
-        # Folder for this subject’s vector store
-        subject_db_dir = os.path.join(VECTOR_DB_DIR, f"subject_{subject_id}")
-        os.makedirs(subject_db_dir, exist_ok=True)
+        embedding = SentenceTransformerEmbedding()
 
-        # Create Chroma vector store and persist
+        save_path = os.path.join(VECTOR_DB_ROOT, f"subject_{subject_id}")
+        os.makedirs(save_path, exist_ok=True)
+
         db = Chroma.from_texts(
-            [text_data],
-            embedding=embeddings,
-            persist_directory=subject_db_dir
+            texts=chunks,
+            embedding=embedding,
+            persist_directory=save_path
         )
-        db.persist()
 
-        print(f"✅ Added text to vector DB for subject {subject_id}")
+        db.persist()
+        print(f"✅ Vector DB created for subject {subject_id}")
         return 1
 
     except Exception as e:
-        print(f"❌ Error adding to vector DB: {e}")
+        print("❌ Error vector DB:", e)
         return 0
 
 
-# -------------------------------------------------------------
-# 🔍 Retrieve the vector store for a given subject
-# -------------------------------------------------------------
+# --------------------------------------------------------------
+# LOAD VECTOR DB
+# --------------------------------------------------------------
 def get_vector_store(subject_id):
-    """Load an existing Chroma vector store for the given subject."""
     try:
-        subject_db_dir = os.path.join(VECTOR_DB_DIR, f"subject_{subject_id}")
+        save_path = os.path.join(VECTOR_DB_ROOT, f"subject_{subject_id}")
 
-        if not os.path.exists(subject_db_dir):
-            raise FileNotFoundError(
-                f"Vector DB for subject {subject_id} not found at {subject_db_dir}"
-            )
+        if not os.path.exists(save_path):
+            raise FileNotFoundError("Vector DB does not exist")
 
-        # ✅ Use the updated embedding function
-        embeddings = OllamaEmbeddings(model=EMBED_MODEL)
+        embedding = SentenceTransformerEmbedding()
 
-        # Load the stored Chroma DB
         db = Chroma(
-            persist_directory=subject_db_dir,
-            embedding_function=embeddings
+            persist_directory=save_path,
+            embedding_function=embedding
         )
-        print(f"✅ Loaded vector store for subject {subject_id}")
+
+        print(f"✅ Loaded vector DB for subject {subject_id}")
         return db
 
     except Exception as e:
-        print(f"❌ Error loading vector store: {e}")
+        print("❌ Load error:", e)
         raise
